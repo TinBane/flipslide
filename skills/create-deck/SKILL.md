@@ -28,7 +28,7 @@ deck-name/
 └── images/          # Any images referenced in slides
 ```
 
-The `index.html` file is the only file you write from scratch. It follows this exact structure:
+You'll rename `template.html` to `index.html` and edit only the markdown content inside the `<script id="fs-source" type="text/markdown">` tag. The HTML structure is already correct and ready to use. It follows this exact structure:
 
 ```html
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>DECK TITLE</title><link rel="stylesheet" href="flipslide.css"><style>body{opacity:0;transition:opacity .3s}body.fs-ready{opacity:1}</style></head><body><div id="fs-deck"></div><script id="fs-source" type="text/markdown">
@@ -40,28 +40,29 @@ The deck markdown is embedded directly inside the `<script id="fs-source" type="
 
 ## Getting the Renderer Files
 
-The deck needs `flipslide.js`, `flipslide.css`, and `fonts/` (including `Outfit-OFL.txt` license) to be self-contained. Obtain them using one of these methods, tried in order:
+The deck needs `template.html`, `flipslide.js`, `flipslide.css`, and `fonts/` to be self-contained. Obtain them using one of these methods, tried in order:
 
 1. **Local copy** — If the Flipslide repo is cloned locally (check for `flipslide.js` in the current project or nearby directories), copy the files directly.
 
-2. **GitHub release zip** — Download and extract the latest release:
+2. **GitHub release zip** — Download and extract the latest release (recommended):
    ```bash
    curl -sL https://github.com/TinBane/flipslide/releases/latest/download/flipslide-renderer.zip -o /tmp/flipslide-renderer.zip
    unzip -o /tmp/flipslide-renderer.zip -d {deck-name}/
+   mv {deck-name}/template.html {deck-name}/index.html
    ```
+   This gives you everything you need, including a ready-to-use HTML template.
 
 3. **Direct download** — If the release zip is unavailable, fetch individual files:
    ```bash
    mkdir -p {deck-name}/fonts
+   curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/template.html -o {deck-name}/index.html
    curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/flipslide.js -o {deck-name}/flipslide.js
    curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/flipslide.css -o {deck-name}/flipslide.css
    curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/fonts/Outfit-Variable.woff2 -o {deck-name}/fonts/Outfit-Variable.woff2
    curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/fonts/Outfit-OFL.txt -o {deck-name}/fonts/Outfit-OFL.txt
    curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/fonts/InterVariable.woff2 -o {deck-name}/fonts/InterVariable.woff2
-   curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/fonts/Inter-Outfit-OFL.txt -o {deck-name}/fonts/Inter-Outfit-OFL.txt
+   curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/fonts/Inter-OFL.txt -o {deck-name}/fonts/Inter-OFL.txt
    ```
-
-**Important:** Always include the license files (`Outfit-OFL.txt` for Outfit, `Inter-Outfit-OFL.txt` for Inter) alongside the font files. Both fonts are SIL Open Font Licensed and require the license to be distributed with them.
 
 ## Slide Format Reference
 

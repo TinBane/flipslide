@@ -1,0 +1,9 @@
+{
+  "name": "flipslide",
+  "description": "Create browser-based slide decks from Markdown using the Flipslide renderer",
+  "version": "0.1.0",
+  "author": {
+    "name": "Adrian"
+  },
+  "repository": "https://github.com/TinBane/flipslide"
+}

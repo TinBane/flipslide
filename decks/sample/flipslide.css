@@ -1,0 +1,547 @@
+/* ============================================================
+   Flipslide — Presentation Renderer Styles
+   ============================================================ */
+
+/* --- Bundled Font --- */
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('fonts/Outfit-Variable.woff2') format('woff2');
+}
+
+/* --- 1. CSS Custom Properties --- */
+:root {
+  --dm-bg:              #0c0c14;
+  --dm-text:            #e8e6e3;
+  --dm-accent:          #e94560;
+  --dm-heading-font:    'Outfit', system-ui, sans-serif;
+  --dm-body-font:       'Outfit', system-ui, sans-serif;
+
+  --dm-slide-padding:   6vw 8vw;
+  --dm-title-size:      7vw;
+  --dm-heading-size:    4.2vw;
+  --dm-body-size:       2.4vw;
+  --dm-table-size:      2vw;
+
+  --dm-split-gap:       5vw;
+
+  --dm-callout-bg:      transparent;
+  --dm-callout-text:    var(--dm-text);
+  --dm-callout-size:    3.8vw;
+  --dm-callout-padding: 3vw 4vw;
+  --dm-callout-radius:  0;
+
+  --dm-footnote-size:   1.3vw;
+}
+
+/* --- 2. Reset / Base --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--dm-bg);
+  color: var(--dm-text);
+  font-family: var(--dm-body-font);
+  font-size: var(--dm-body-size);
+  font-weight: 350;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- 3. Slide Container --- */
+#fs-deck {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--dm-slide-padding);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease;
+  background-color: var(--dm-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+.slide-active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+}
+
+/* --- 4. Slide Type Layouts --- */
+
+/* Title slide — centered both axes */
+.slide-title {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.slide-title h1 {
+  font-family: var(--dm-heading-font);
+  font-size: clamp(3vw, var(--dm-title-size), 11vw);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--dm-text);
+  margin-bottom: 0.25em;
+}
+
+.slide-title h2 {
+  font-family: var(--dm-body-font);
+  font-size: clamp(1.5vw, calc(var(--dm-title-size) * 0.35), 4vw);
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--dm-text);
+  opacity: 0.5;
+}
+
+/* Content slide — top-aligned */
+.slide-content {
+  justify-content: flex-start;
+}
+
+.slide-content h2,
+.slide-split h2 {
+  font-family: var(--dm-heading-font);
+  font-size: clamp(2vw, var(--dm-heading-size), 7vw);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--dm-text);
+  margin-bottom: 0.9em;
+}
+
+/* Split slide — grid layout */
+.slide-split {
+  justify-content: flex-start;
+}
+
+.slide-split h2 {
+  width: 100%;
+}
+
+.slide-split .slide-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--dm-split-gap);
+  align-items: center;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+
+.split-left, .split-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* --- 5. Content Wrapper Styles --- */
+
+/* Lists */
+.slide ul, .slide ol {
+  padding-left: 1.1em;
+  margin: 0.3em 0;
+}
+
+.slide li {
+  margin-bottom: 0.5em;
+  line-height: 1.5;
+  font-weight: 350;
+}
+
+.slide li::marker {
+  color: var(--dm-accent);
+  font-weight: 500;
+}
+
+.slide ul ul, .slide ol ol, .slide ul ol, .slide ol ul {
+  margin-top: 0.3em;
+  padding-left: 1.2em;
+}
+
+/* Task lists */
+.content-tasklist ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.content-tasklist li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+}
+
+.content-tasklist input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1em;
+  height: 1em;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 3px;
+  flex-shrink: 0;
+  position: relative;
+  top: 0.08em;
+  cursor: default;
+  transition: all 0.15s ease;
+}
+
+.content-tasklist input[type="checkbox"]:checked {
+  background: var(--dm-accent);
+  border-color: var(--dm-accent);
+}
+
+.content-tasklist input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 0.28em;
+  top: 0.12em;
+  width: 0.3em;
+  height: 0.55em;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Tables */
+.slide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--dm-table-size);
+  margin: 0.3em 0;
+}
+
+.slide th, .slide td {
+  padding: 0.7em 1.2em;
+  text-align: left;
+}
+
+.slide th {
+  font-weight: 500;
+  color: var(--dm-text);
+  opacity: 0.5;
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  padding-bottom: 0.9em;
+}
+
+.slide td {
+  color: var(--dm-text);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.slide tr:last-child td {
+  border-bottom: none;
+}
+
+.slide th.align-center, .slide td.align-center { text-align: center; }
+.slide th.align-right, .slide td.align-right { text-align: right; }
+
+/* Images */
+.content-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+
+.content-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0.6vw;
+}
+
+.slide.image-only {
+  --dm-slide-padding: 0;
+}
+
+.slide.image-only .content-image img {
+  border-radius: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.split-left img, .split-right img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0.6vw;
+}
+
+/* Video */
+.content-video {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+
+.content-video video,
+.content-video iframe {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 0.6vw;
+}
+
+/* Blockquotes */
+.content-blockquote blockquote,
+.slide blockquote {
+  border-left: 2px solid var(--dm-accent);
+  padding: 0.4em 0 0.4em 1.5em;
+  margin: 0.5em 0;
+  font-weight: 300;
+  font-size: 1.05em;
+  line-height: 1.65;
+  color: var(--dm-text);
+  opacity: 0.85;
+}
+
+/* Definition lists */
+.content-deflist dl {
+  margin: 0.5em 0;
+}
+
+.content-deflist dt {
+  font-weight: 600;
+  color: var(--dm-text);
+  margin-top: 0.8em;
+  letter-spacing: -0.01em;
+}
+
+.content-deflist dd {
+  margin-left: 1.5em;
+  margin-top: 0.15em;
+  opacity: 0.7;
+  font-weight: 350;
+}
+
+/* --- 6. Inline Element Styles --- */
+
+.slide strong { font-weight: 600; }
+.slide em { font-style: italic; }
+
+.slide code {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Menlo', monospace;
+  background: rgba(255,255,255,0.06);
+  padding: 0.1em 0.35em;
+  border-radius: 0.2em;
+  font-size: 0.85em;
+  font-weight: 400;
+}
+
+.slide pre {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 0.5vw;
+  padding: 1.4em 1.6em;
+  overflow-x: auto;
+  margin: 0.5em 0;
+  font-size: 0.8em;
+  line-height: 1.6;
+}
+
+.slide pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.slide mark {
+  background: var(--dm-accent);
+  color: #fff;
+  padding: 0.02em 0.25em;
+  border-radius: 0.15em;
+}
+
+.slide del {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.slide a {
+  color: var(--dm-accent);
+  text-decoration: none;
+}
+
+.slide sup {
+  font-size: 0.6em;
+  vertical-align: super;
+  color: var(--dm-accent);
+  font-weight: 500;
+}
+
+.slide p {
+  margin-bottom: 0.45em;
+  line-height: 1.6;
+}
+
+.slide p:last-child {
+  margin-bottom: 0;
+}
+
+/* --- 7. Callout Block --- */
+.content-callout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.content-callout .callout-box {
+  background: var(--dm-callout-bg);
+  color: var(--dm-callout-text);
+  font-family: var(--dm-heading-font);
+  font-size: var(--dm-callout-size);
+  font-weight: 600;
+  padding: var(--dm-callout-padding);
+  border-radius: var(--dm-callout-radius);
+  border-left: 3px solid var(--dm-accent);
+  text-align: left;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  width: 100%;
+}
+
+/* --- 8. Footnotes & Attribution --- */
+.slide-footnote {
+  font-size: var(--dm-footnote-size);
+  opacity: 0.4;
+  font-style: italic;
+  font-weight: 300;
+  margin-top: auto;
+  padding-top: 1.5em;
+}
+
+.slide-footnotes {
+  font-size: var(--dm-footnote-size);
+  margin-top: auto;
+  padding-top: 1.2em;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  opacity: 0.5;
+  font-weight: 350;
+  line-height: 1.5;
+}
+
+.slide-footnotes p {
+  margin-bottom: 0.15em;
+}
+
+/* --- 9. Separator --- */
+.slide-separator {
+  border: none;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+  margin: 1.5em 0;
+  max-width: 60%;
+}
+
+/* --- 10. Logo / Branding --- */
+.slide-logo {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.slide-logo[data-pos="TR"] { top: 2.5vw; right: 2.5vw; }
+.slide-logo[data-pos="TL"] { top: 2.5vw; left: 2.5vw; }
+.slide-logo[data-pos="BR"] { bottom: 2.5vw; right: 2.5vw; }
+.slide-logo[data-pos="BL"] { bottom: 2.5vw; left: 2.5vw; }
+
+/* --- 11. Progress Bar & Slide Number --- */
+.progress-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--dm-accent);
+  z-index: 100;
+  transition: width 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.slide-number {
+  position: fixed;
+  z-index: 100;
+  font-size: 1.2vw;
+  font-family: var(--dm-body-font);
+  font-weight: 400;
+  color: var(--dm-text);
+  opacity: 0.3;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
+.slide-number[data-position="BR"] { bottom: 1.5vw; right: 2.5vw; }
+.slide-number[data-position="BL"] { bottom: 1.5vw; left: 2.5vw; }
+.slide-number[data-position="TR"] { top: 1.5vw; right: 2.5vw; }
+.slide-number[data-position="TL"] { top: 1.5vw; left: 2.5vw; }
+
+/* --- 12. Fade Transition --- */
+.fs-transition-fade .slide {
+  transition: opacity 0.5s ease;
+}
+
+.fs-transition-none .slide {
+  transition: none;
+}
+
+/* --- 13. Auto-Fit Phase 1 (CSS clamp) --- */
+.slide-title h1 {
+  font-size: clamp(3vw, var(--dm-title-size), 11vw);
+}
+
+.slide-content h2,
+.slide-split h2 {
+  font-size: clamp(2vw, var(--dm-heading-size), 7vw);
+}
+
+/* --- 14. Print Stylesheet --- */
+@media print {
+  body { opacity: 1 !important; }
+
+  #fs-deck {
+    width: auto;
+    height: auto;
+    overflow: visible;
+    position: static;
+  }
+
+  .slide {
+    position: static;
+    opacity: 1 !important;
+    visibility: visible !important;
+    page-break-after: always;
+    width: 100%;
+    height: 100vh;
+    break-inside: avoid;
+  }
+
+  .progress-bar,
+  .slide-number,
+  .slide-logo { display: none; }
+}

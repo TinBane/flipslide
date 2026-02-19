@@ -1,0 +1,268 @@
+---
+name: create-deck
+description: Create a Flipslide presentation deck from a topic or outline. Generates a self-contained HTML slide deck using Markdown syntax that renders in any browser with no dependencies.
+user-invocable: true
+argument-hint: [topic or outline]
+---
+
+You are creating a Flipslide presentation deck. Flipslide is a zero-dependency, browser-based presentation renderer. The entire deck is a single HTML file with embedded Markdown — no build step, no package manager. It works from `file://` or any HTTP server.
+
+## GitHub Repository
+
+Flipslide source and releases: **https://github.com/TinBane/flipslide**
+
+## Output Structure
+
+Create a folder with this structure:
+
+```
+deck-name/
+├── index.html       # Self-contained deck (HTML shell + embedded markdown)
+├── flipslide.js     # Renderer
+├── flipslide.css    # Styles
+├── fonts/           # Bundled fonts + licenses
+│   ├── Outfit-Variable.woff2
+│   ├── Outfit-OFL.txt              # Outfit license (SIL OFL)
+│   ├── InterVariable.woff2
+│   └── Inter-Outfit-OFL.txt        # Inter license (SIL OFL)
+└── images/          # Any images referenced in slides
+```
+
+The `index.html` file is the only file you write from scratch. It follows this exact structure:
+
+```html
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>DECK TITLE</title><link rel="stylesheet" href="flipslide.css"><style>body{opacity:0;transition:opacity .3s}body.fs-ready{opacity:1}</style></head><body><div id="fs-deck"></div><script id="fs-source" type="text/markdown">
+DECK MARKDOWN GOES HERE
+</script><script src="flipslide.js"></script></body></html>
+```
+
+The deck markdown is embedded directly inside the `<script id="fs-source" type="text/markdown">` tag. Do NOT create a separate `deck.md` file.
+
+## Getting the Renderer Files
+
+The deck needs `flipslide.js`, `flipslide.css`, and `fonts/` (including `Outfit-OFL.txt` license) to be self-contained. Obtain them using one of these methods, tried in order:
+
+1. **Local copy** — If the Flipslide repo is cloned locally (check for `flipslide.js` in the current project or nearby directories), copy the files directly.
+
+2. **GitHub release zip** — Download and extract the latest release:
+   ```bash
+   curl -sL https://github.com/TinBane/flipslide/releases/latest/download/flipslide-renderer.zip -o /tmp/flipslide-renderer.zip
+   unzip -o /tmp/flipslide-renderer.zip -d {deck-name}/
+   ```
+
+3. **Direct download** — If the release zip is unavailable, fetch individual files:
+   ```bash
+   mkdir -p {deck-name}/fonts
+   curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/flipslide.js -o {deck-name}/flipslide.js
+   curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/flipslide.css -o {deck-name}/flipslide.css
+   curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/fonts/Outfit-Variable.woff2 -o {deck-name}/fonts/Outfit-Variable.woff2
+   curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/fonts/Outfit-OFL.txt -o {deck-name}/fonts/Outfit-OFL.txt
+   curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/fonts/InterVariable.woff2 -o {deck-name}/fonts/InterVariable.woff2
+   curl -sL https://raw.githubusercontent.com/TinBane/flipslide/main/fonts/Inter-Outfit-OFL.txt -o {deck-name}/fonts/Inter-Outfit-OFL.txt
+   ```
+
+**Important:** Always include the license files (`Outfit-OFL.txt` for Outfit, `Inter-Outfit-OFL.txt` for Inter) alongside the font files. Both fonts are SIL Open Font Licensed and require the license to be distributed with them.
+
+## Slide Format Reference
+
+### Slide Separators
+
+| Syntax | Purpose |
+|--------|---------|
+| `---`  | Separates slides |
+| `***`  | Splits a slide into two columns (left/right) |
+| `___`  | Visual horizontal rule within a slide |
+
+### Slide Types
+
+| Opening Element | Layout | Use |
+|-----------------|--------|-----|
+| `# Title` | Title slide (centered) | Section dividers, opening/closing |
+| `# Title` + `## Subtitle` | Title with subtitle | Opening slides |
+| `## Heading` | Content slide | Standard slides with content |
+| *(no heading)* | Content slide | Standalone content (callouts, images) |
+
+**Only H1 and H2 are supported.** H3 and below render as plain text.
+
+### Content Types
+
+Each slide should have **one primary content element**:
+
+- **Bullet list:** `- item`
+- **Numbered list:** `1. item`
+- **Task list:** `- [ ] item` / `- [x] item`
+- **Table:** GFM pipe syntax
+- **Image:** `![alt](images/photo.jpg)` or external URL
+- **Blockquote:** `> text`
+- **Definition list:** `Term` on one line, `: Definition` on the next
+- **Callout block:** Fenced block with `callout` language (for big numbers/stats)
+- **Paragraph text:** For quotes or statement slides
+
+### Inline Formatting
+
+- `**bold**` and `*italic*`
+- `` `inline code` ``
+- `~~strikethrough~~`
+- `==highlight==` (renders as `<mark>`)
+- `[^1]` footnote reference + `[^1]: text` footnote definition
+
+### Split (Two-Column) Layouts
+
+Use `***` on its own line to split a slide into left/right columns:
+
+```markdown
+## Heading
+
+![Photo](images/photo.jpg)
+
+***
+
+- Point one
+- Point two
+- Point three
+```
+
+The heading spans full width. Content before `***` goes left, after goes right. Default is 50/50. Override with `<!-- slide: split=40/60 -->`.
+
+### Callout Blocks
+
+For "big number" or key stat slides:
+
+````markdown
+```callout
+$1.7M Revenue — +21% Growth
+```
+````
+
+### Video and Audio
+
+````markdown
+```video
+src: videos/demo.mp4
+poster: images/poster.jpg
+autoplay: false
+controls: true
+```
+````
+
+````markdown
+```audio
+src: sounds/ambient.mp3
+loop: true
+autoplay: true
+```
+````
+
+### Speaker Notes
+
+```markdown
+<!-- notes: Talking points for this slide go here. -->
+```
+
+Notes are stored but not displayed in the presentation.
+
+### Attribution / Source Lines
+
+The last italic paragraph on a slide is auto-detected as an attribution line and styled small at the bottom:
+
+```markdown
+*Source: Gartner Q3 2025 Report*
+```
+
+### Per-Slide Overrides
+
+```markdown
+<!-- slide: bg=c, heading-size=6vw, text=#ffffff -->
+```
+
+| Key | Effect | Example |
+|-----|--------|---------|
+| `bg` | Background variant (a, b, c) | `bg=a` |
+| `background` | Background image | `background=images/bg.jpg` |
+| `bg-color` | Background color | `bg-color=#1a1a2e` |
+| `text` | Text color | `text=#ffffff` |
+| `accent` | Accent color | `accent=#ff6b6b` |
+| `heading-size` | Heading font size | `heading-size=6vw` |
+| `body-size` | Body font size | `body-size=2.5vw` |
+| `padding` | Slide padding | `padding=3vw` |
+| `split` | Column ratio for split slides | `split=40/60` |
+
+## Bundled Fonts
+
+Two variable fonts are included. Both support all weights in a single file.
+
+| Font | File | Style | Best For |
+|------|------|-------|----------|
+| **Outfit** | `fonts/Outfit-Variable.woff2` | Geometric sans-serif, modern/friendly | Creative, startup, informal decks |
+| **Inter** | `fonts/InterVariable.woff2` | Neutral sans-serif, highly legible | Business, technical, data-heavy decks |
+
+Use them in the config block via `heading_font` and `body_font`. You can mix them (e.g. Outfit for headings, Inter for body) or use one for both.
+
+## Config Block
+
+The config block goes at the **very end** of the markdown, wrapped in an HTML comment:
+
+```yaml
+<!-- flipslide:config
+theme:
+  background: "#0f172a"
+  text: "#f1f5f9"
+  accent: "#38bdf8"
+  heading_font: "fonts/Outfit-Variable.woff2"
+  body_font: "fonts/Outfit-Variable.woff2"
+  slide_number: true
+  slide_number_format: "{current} / {total}"
+  progress_bar: true
+  transition: fade
+  aspect_ratio: "16:9"
+  autofit: true
+  autofit_min: "1.2vw"
+
+backgrounds:
+  a:
+    color: "#0f172a"
+  b:
+    color: "#1a1a2e"
+  c:
+    color: "#1e3a5f"
+
+background_map:
+  title: a
+  content: b
+
+slide_overrides:
+  title:
+    heading-size: "10vw"
+  content:
+    heading-size: "4.5vw"
+-->
+```
+
+### Config Sections
+
+**`theme:`** — Core visual settings. All color values must be quoted. Font paths are relative to the deck folder. Available keys: `background`, `text`, `accent`, `heading_font`, `body_font`, `slide_padding`, `slide_number` (bool), `slide_number_format`, `slide_number_location` (TL/TR/BL/BR), `progress_bar` (bool), `transition` (fade), `aspect_ratio`, `autofit` (bool), `autofit_min`.
+
+**`backgrounds:`** — Named background variants (a, b, c, etc.). Each can have `image`, `color`, `size`, `position`.
+
+**`background_map:`** — Maps slide types (`title`, `content`) to background variants.
+
+**`slide_overrides:`** — CSS variable overrides by slide type (`title`, `content`, `image-only`). Keys map to `--dm-*` CSS properties.
+
+**`branding:`** — Persistent logo. Keys: `logo` (path), `logo_position` (TL/TR/BL/BR), `logo_size`, `logo_opacity`, `logo_exclude` (array of 1-indexed slide numbers).
+
+**`external_css:`** — Path to a custom CSS file loaded after `flipslide.css`.
+
+## Authoring Guidelines
+
+1. **Start with a title slide** using `# Title` (optionally with `## Subtitle`).
+2. **End with a closing slide** (thank you, Q&A, or contact info).
+3. **One idea per slide.** Keep slides focused — one content element each.
+4. **Use the config block** for consistent theming rather than per-slide overrides.
+5. **Choose a cohesive color palette.** Set `background`, `text`, and `accent` in the theme. Use 2-3 background variants for visual variety.
+6. **Use callout blocks** for key metrics or statistics that deserve emphasis.
+7. **Use split layouts** when pairing an image with bullet points or comparing two things.
+8. **Add speaker notes** for context that helps the presenter but shouldn't be on screen.
+9. **Add attribution lines** (italic at slide bottom) for data sources.
+10. **Keep decks to 7-15 slides** for most presentations.
+11. **All sizes use `vw` units** for viewport-proportional scaling.
+12. **HTML is not rendered** in slides (security measure). Use only Markdown syntax.

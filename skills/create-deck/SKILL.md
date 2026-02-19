@@ -253,6 +253,16 @@ slide_overrides:
 
 **`external_css:`** — Path to a custom CSS file loaded after `flipslide.css`.
 
+## Example: Sample Deck
+
+For a detailed reference of a complete dark-themed deck with professional styling, see the sample deck files in the Flipslide repository:
+
+- **Markdown structure:** [decks/sample/deck.md](https://github.com/TinBane/flipslide/blob/main/decks/sample/deck.md) — Shows slide structure, tables, callouts, split layouts, speaker notes, and a complete config block
+- **Theme styling:** [decks/sample/theme.css](https://github.com/TinBane/flipslide/blob/main/decks/sample/theme.css) — Custom CSS overrides for the dark theme
+- **Live demo:** [decks/sample/index.html](https://github.com/TinBane/flipslide/blob/main/decks/sample/index.html) — Open in a browser to see the rendered result
+
+The sample deck demonstrates a professional dark theme (`#0f172a` background, `#38bdf8` accent) with multiple content types (tables, callouts, images, lists, blockquotes) and advanced features (split layouts, background overrides, custom fonts).
+
 ## Authoring Guidelines
 
 1. **Start with a title slide** using `# Title` (optionally with `## Subtitle`).

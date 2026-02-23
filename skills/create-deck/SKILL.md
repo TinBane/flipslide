@@ -1,7 +1,7 @@
 ---
 name: create-deck
 description: Create a Flipslide presentation deck from a topic or outline. Generates a self-contained HTML slide deck using Markdown syntax that renders in any browser with no dependencies.
-skill-version: v0.2.0
+skill-version: v0.3.0
 user-invocable: true
 argument-hint: [topic or outline]
 ---
@@ -84,9 +84,10 @@ The deck needs `template.html`, `flipslide.js`, `flipslide.css`, and `fonts/` to
 | `# Title` | Title slide (centered) | Section dividers, opening/closing |
 | `# Title` + `## Subtitle` | Title with subtitle | Opening slides |
 | `## Heading` | Content slide | Standard slides with content |
+| `## Heading` + `### Sub` | Content with sub-heading | Slides needing context below the heading |
 | *(no heading)* | Content slide | Standalone content (callouts, images) |
 
-**Only H1 and H2 are supported.** H3 and below render as plain text.
+**H1, H2, and H3 are supported.** H4 and below render as plain text. H3 provides a smaller, lighter sub-heading — useful for dates, context lines, or section qualifiers placed below an H1 or H2. It does not affect slide type (only H1 and H2 determine title vs content layout).
 
 ### Content Types
 
@@ -329,7 +330,7 @@ Before creating a deck, check if a newer version of Flipslide is available:
 
 ```bash
 LATEST=$(curl -s https://api.github.com/repos/TinBane/flipslide/releases/latest | grep '"tag_name"' | head -1 | sed 's/.*v//;s/".*//')
-CURRENT="0.2.0"  # Current known version
+CURRENT="0.3.0"  # Current known version
 if [ "$LATEST" != "$CURRENT" ]; then
   echo "A new version is available: $LATEST (current: $CURRENT). Consider updating."
 fi

@@ -6,7 +6,7 @@ DIST="$REPO_ROOT/dist"
 ZIP_NAME="flipslide-renderer.zip"
 
 # Verify required files exist
-for f in flipslide.js flipslide.css template.html fonts/Outfit-Variable.woff2 fonts/Outfit-OFL.txt fonts/InterVariable.woff2 fonts/Inter-OFL.txt themes/observatory.css themes/crimson.css themes/cloud-dancer.css themes/images/bg-bold.svg; do
+for f in flipslide.js flipslide.css template.html README-dist.md fonts/Outfit-Variable.woff2 fonts/Outfit-OFL.txt fonts/InterVariable.woff2 fonts/Inter-OFL.txt themes/observatory.css themes/crimson.css themes/cloud-dancer.css themes/images/bg-bold.svg; do
     if [[ ! -f "$REPO_ROOT/$f" ]]; then
         echo "error: missing $f" >&2
         exit 1
@@ -21,6 +21,7 @@ mkdir -p "$DIST"
 cd "$REPO_ROOT"
 zip -q "$DIST/$ZIP_NAME" \
     template.html \
+    README-dist.md \
     flipslide.js \
     flipslide.css \
     themes/observatory.css \

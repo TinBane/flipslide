@@ -143,6 +143,7 @@
         }
 
         // Headings
+        if (/^### /.test(ln)) { out += '<h3>' + Markdown._inline(ln.slice(4).trim()) + '</h3>\n'; i++; continue; }
         if (/^# /.test(ln)) { out += '<h1>' + Markdown._inline(ln.slice(2).trim()) + '</h1>\n'; i++; continue; }
         if (/^## /.test(ln)) { out += '<h2>' + Markdown._inline(ln.slice(3).trim()) + '</h2>\n'; i++; continue; }
 
@@ -218,7 +219,7 @@
         // Paragraphs
         var para = [];
         while (i < lines.length && lines[i].trim() !== '' &&
-               !/^```/.test(lines[i]) && !/^#{1,2} /.test(lines[i]) &&
+               !/^```/.test(lines[i]) && !/^#{1,3} /.test(lines[i]) &&
                !/^\|/.test(lines[i]) && !/^[-*+] /.test(lines[i]) &&
                !/^\d+\.\s/.test(lines[i]) && !/^>\s?/.test(lines[i]) &&
                !/^_{3,}\s*$/.test(lines[i]) && !/^!\[/.test(lines[i].trim()) &&
@@ -915,6 +916,7 @@
       var R = Markdown.render.bind(Markdown), ok = Test.ok;
       ok('MD: H1', R('# Hello').includes('<h1>Hello</h1>'));
       ok('MD: H2', R('## World').includes('<h2>World</h2>'));
+      ok('MD: H3', R('### Sub').includes('<h3>Sub</h3>'));
       ok('MD: bold', R('**bold**').includes('<strong>bold</strong>'));
       ok('MD: italic', R('*italic*').includes('<em>italic</em>'));
       ok('MD: bold+italic', R('***both***').includes('<strong><em>both</em></strong>'));

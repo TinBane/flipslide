@@ -112,6 +112,16 @@ html, body {
   opacity: 0.5;
 }
 
+.slide-title h3 {
+  font-family: var(--dm-body-font);
+  font-size: clamp(1.2vw, calc(var(--dm-title-size) * 0.25), 3vw);
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--dm-text);
+  opacity: 0.35;
+}
+
 /* Content slide — top-aligned */
 .slide-content {
   justify-content: flex-start;
@@ -126,6 +136,22 @@ html, body {
   letter-spacing: -0.025em;
   color: var(--dm-text);
   margin-bottom: 0.9em;
+}
+
+.slide-content h3,
+.slide-split h3 {
+  font-family: var(--dm-heading-font);
+  font-size: clamp(1.4vw, calc(var(--dm-heading-size) * 0.65), 4.5vw);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--dm-text);
+  opacity: 0.7;
+  margin-bottom: 0.7em;
+}
+
+h2 + h3 {
+  margin-top: -0.5em;
 }
 
 /* Split slide — grid layout */

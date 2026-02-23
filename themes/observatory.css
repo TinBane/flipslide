@@ -1,0 +1,11 @@
+/* ============================================================
+   Flipslide Theme — Observatory
+   Deep navy background with sky-blue accent and constellation
+   background motifs. Designed for the sample deck.
+   ============================================================ */
+
+:root {
+  --dm-bg:     #0f172a;
+  --dm-text:   #f1f5f9;
+  --dm-accent: #38bdf8;
+}

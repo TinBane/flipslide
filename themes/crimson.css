@@ -1,0 +1,12 @@
+/* ============================================================
+   Flipslide Theme — Crimson
+   Clean white background with dark slate text and crimson accent.
+   Recommended font: Inter. Pair with a solid crimson title
+   background (backgrounds: a: color: "#c52d40") for maximum impact.
+   ============================================================ */
+
+:root {
+  --dm-bg:     #ffffff;
+  --dm-text:   #1e293b;
+  --dm-accent: #c52d40;
+}

@@ -1,6 +1,7 @@
 ---
 name: create-deck
 description: Create a Flipslide presentation deck from a topic or outline. Generates a self-contained HTML slide deck using Markdown syntax that renders in any browser with no dependencies.
+skill-version: v0.2.0
 user-invocable: true
 argument-hint: [topic or outline]
 ---
@@ -20,6 +21,8 @@ deck-name/
 ├── index.html       # Self-contained deck (HTML shell + embedded markdown)
 ├── flipslide.js     # Renderer
 ├── flipslide.css    # Styles
+├── themes/          # Named theme CSS files (included in release zip)
+│   └── observatory.css
 ├── fonts/           # Bundled fonts + licenses
 │   ├── Outfit-Variable.woff2
 │   ├── Outfit-OFL.txt              # Outfit license (SIL OFL)
@@ -188,6 +191,50 @@ The last italic paragraph on a slide is auto-detected as an attribution line and
 | `padding` | Slide padding | `padding=3vw` |
 | `split` | Column ratio for split slides | `split=40/60` |
 
+## Available Themes
+
+Instead of manually specifying colors in the config, you can use a named theme. The theme CSS file is loaded before any per-deck config values, so individual keys in `theme:` still override the theme for that property only.
+
+| Theme | Background | Text | Accent | Character |
+|-------|-----------|------|--------|-----------|
+| `observatory` | `#0f172a` dark navy | `#f1f5f9` light slate | `#38bdf8` sky blue | Professional, technical, data-heavy |
+| `crimson` | `#ffffff` white | `#1e293b` dark slate | `#c52d40` crimson red | Corporate reports, bold, high-contrast. Pair with a solid crimson title background: `backgrounds: a: color: "#c52d40"` and `background_map: title: a`. Recommended font: Inter. |
+| `cloud-dancer` | `#f8f9fa` off-white | `#2c3e50` slate | `#6c63ff` vibrant purple | Modern, creative, visually rich. Includes SVG background support. |
+
+To use a theme, set `name:` inside the `theme:` block:
+
+```yaml
+theme:
+  name: observatory
+  slide_number: true
+  progress_bar: true
+```
+
+You can still override individual colors:
+
+```yaml
+theme:
+  name: observatory
+  accent: "#f97316"   # override just the accent; background and text come from the theme
+```
+
+When `name` is set, the renderer loads `themes/{name}.css` relative to the deck's `index.html`. The `themes/` folder is included in the release zip so no extra download is needed.
+
+If no theme `name` is set and no colors are specified in `theme:`, the renderer falls back to the default dark palette in `flipslide.css` (`#0c0c14` background, `#e8e6e3` text, `#e94560` red accent).
+
+### SVG Background Assets
+
+The included SVG backgrounds are automatically theme-aware. Specify them in per-slide overrides or as background variants:
+
+```yaml
+backgrounds:
+  a:
+    image: "themes/images/bg-bold.svg"
+    color: "#f8f9fa"
+```
+
+The `bg-bold.svg` file is included in the release zip and is automatically recolored to match your theme's accent and background colors — no manual editing needed. This creates visual drama and interest without extra design work.
+
 ## Bundled Fonts
 
 Two variable fonts are included. Both support all weights in a single file.
@@ -206,9 +253,7 @@ The config block goes at the **very end** of the markdown, wrapped in an HTML co
 ```yaml
 <!-- flipslide:config
 theme:
-  background: "#0f172a"
-  text: "#f1f5f9"
-  accent: "#38bdf8"
+  name: observatory
   heading_font: "fonts/Outfit-Variable.woff2"
   body_font: "fonts/Outfit-Variable.woff2"
   slide_number: true
@@ -277,3 +322,53 @@ The sample deck demonstrates a professional dark theme (`#0f172a` background, `#
 10. **Keep decks to 7-15 slides** for most presentations.
 11. **All sizes use `vw` units** for viewport-proportional scaling.
 12. **HTML is not rendered** in slides (security measure). Use only Markdown syntax.
+
+## Version Checking and Updates
+
+Before creating a deck, check if a newer version of Flipslide is available:
+
+```bash
+LATEST=$(curl -s https://api.github.com/repos/TinBane/flipslide/releases/latest | grep '"tag_name"' | head -1 | sed 's/.*v//;s/".*//')
+CURRENT="0.2.0"  # Current known version
+if [ "$LATEST" != "$CURRENT" ]; then
+  echo "A new version is available: $LATEST (current: $CURRENT). Consider updating."
+fi
+```
+
+When creating decks, inform the user if an update is available and suggest they download the latest release zip from:
+**https://github.com/TinBane/flipslide/releases/latest**
+
+## Sharing Custom Color Schemes via Pull Request
+
+If you create a color scheme you love, consider contributing it back to the Flipslide project. This helps the community and ensures your theme receives maintenance.
+
+**Before submitting a PR with a new theme:**
+
+1. **Review the scheme for proprietary data:**
+   - Colors are fine (hex values, RGB, HSL)
+   - Font references are fine (system fonts, open-source font URLs)
+   - Custom SVG graphics are fine (as long as they're original or properly licensed)
+   - ❌ Do NOT include: customer names, company-specific logos, confidential imagery, proprietary design systems
+
+2. **If assets exist** (custom SVGs, images):
+   - Ensure they have explicit open-source licenses (CC0, MIT, etc.)
+   - Or create original work that you own
+   - Include `LICENSE` or `CREDITS` comments in the PR
+
+3. **Create a theme file** following the existing structure:
+   ```css
+   /* themes/your-theme.css */
+   :root {
+     --dm-bg: #yourcolor;
+     --dm-text: #yourcolor;
+     --dm-accent: #yourcolor;
+     /* ... other properties ... */
+   }
+   ```
+
+4. **Open a pull request** to **https://github.com/TinBane/flipslide** with:
+   - Theme CSS file
+   - Brief description of the theme's character
+   - Sample images or screenshots (optional)
+
+The Flipslide maintainers will review for quality, inclusivity, and data privacy before merging.

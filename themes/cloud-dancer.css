@@ -1,0 +1,61 @@
+/* ============================================================
+   Flipslide Theme — Cloud Dancer
+   Pantone Colour of the Year 2026 palette.
+   Warm off-white ground · Baltic Sea accent · Blue Fusion text
+   Golden Mist callout highlight.
+   ============================================================ */
+
+:root {
+  --dm-bg:              #F0EEEB;  /* Cloud Dancer        */
+  --dm-text:            #4A6375;  /* Blue Fusion         */
+  --dm-accent:          #79B7D8;  /* Baltic Sea          */
+
+  --dm-callout-bg:      #D7CD96;  /* Golden Mist         */
+  --dm-callout-text:    #4A6375;  /* Blue Fusion         */
+  --dm-callout-radius:  0.5vw;
+}
+
+/* ── Title subtitle — override opacity-fade; use Hematite directly ── */
+.slide-title h2 {
+  color: #746F6B;
+  opacity: 1;
+}
+
+/* ── Light-mode structural overrides ─────────────────────────────────
+   flipslide.css hardcodes rgba(255,255,255,...) for borders and
+   backgrounds assuming a dark base. Swap to dark-on-light equivalents.
+   ─────────────────────────────────────────────────────────────────── */
+
+.slide th {
+  border-bottom-color: rgba(74, 99, 117, 0.18);
+}
+
+.slide td {
+  border-bottom-color: rgba(74, 99, 117, 0.08);
+}
+
+.slide code {
+  background: rgba(74, 99, 117, 0.08);
+}
+
+.slide pre {
+  background: rgba(74, 99, 117, 0.05);
+  border-color: rgba(74, 99, 117, 0.12);
+}
+
+.slide-footnotes {
+  border-top-color: rgba(74, 99, 117, 0.12);
+}
+
+.slide-separator {
+  background: rgba(74, 99, 117, 0.14);
+}
+
+.content-tasklist input[type="checkbox"] {
+  border-color: rgba(74, 99, 117, 0.30);
+}
+
+/* mark highlight — Baltic Sea bg, white text stays legible */
+.slide mark {
+  color: #ffffff;
+}

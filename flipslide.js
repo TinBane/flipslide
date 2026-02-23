@@ -88,6 +88,12 @@
       if (css) { var el = document.createElement('style'); el.textContent = css; document.head.appendChild(el); }
     },
     loadExternalCSS: function (config) {
+      var t = config.theme || {};
+      if (t.name) {
+        var tl = document.createElement('link'); tl.rel = 'stylesheet';
+        tl.href = 'themes/' + t.name + '.css';
+        document.head.appendChild(tl);
+      }
       if (!config.external_css) return;
       var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = config.external_css;
       document.head.appendChild(l);
@@ -444,7 +450,11 @@
           if (bg) {
             if (bg.color) sec.style.backgroundColor = bg.color;
             if (bg.image) {
-              sec.style.backgroundImage = 'url(' + bg.image + ')';
+              if (/\.svg$/i.test(bg.image)) {
+                SvgTheme.applyTo(sec, bg.image, config);
+              } else {
+                sec.style.backgroundImage = 'url(' + bg.image + ')';
+              }
               if (bg.size) sec.style.backgroundSize = bg.size;
               if (bg.position) sec.style.backgroundPosition = bg.position;
             }
@@ -453,7 +463,11 @@
 
         // Per-slide background image
         if (s.overrides.background) {
-          sec.style.backgroundImage = 'url(' + s.overrides.background + ')';
+          if (/\.svg$/i.test(s.overrides.background)) {
+            SvgTheme.applyTo(sec, s.overrides.background, config);
+          } else {
+            sec.style.backgroundImage = 'url(' + s.overrides.background + ')';
+          }
           sec.style.backgroundSize = 'cover';
           sec.style.backgroundPosition = 'center';
           sec.classList.add('slide-bg');
@@ -636,6 +650,235 @@
     }
   };
 
+  // ── ContentFit ──
+  // Prevents text and structural content from overflowing slide bounds.
+  // Pass 1: Compress spacing on lists, tables, blockquotes, definition lists.
+  // Pass 1.5: Compress table cell padding and border-spacing.
+  // Pass 2: Reduce font-size on those elements.
+  // Pass 3: If still overflowing, reduce overall slide font-size.
+  var ContentFit = {
+    SPACING: [
+      ['0.35em', '1.4', '0.2em'],
+      ['0.2em',  '1.3', '0.1em'],
+      ['0.1em',  '1.2', '0'],
+      ['0',      '1.1', '0']
+    ],
+    MIN_SCALE: 0.65,
+    FONT_STEP: 0.05,
+
+    run: function () {
+      var slides = document.querySelectorAll('.slide');
+      for (var i = 0; i < slides.length; i++) {
+        ContentFit._fit(slides[i]);
+      }
+    },
+
+    _over: function (el) { return el.scrollHeight > el.clientHeight + 2; },
+
+    _fit: function (slide) {
+      if (!ContentFit._over(slide)) return;
+
+      var lists = slide.querySelectorAll('ul, ol');
+      var tables = slide.querySelectorAll('table');
+      var dls = slide.querySelectorAll('dl');
+      var blockquotes = slide.querySelectorAll('blockquote');
+      var hasStructural = lists.length || tables.length || dls.length || blockquotes.length;
+
+      // Pass 1: Compress spacing on structural elements
+      if (hasStructural) {
+        var items = slide.querySelectorAll('li');
+        var dlItems = slide.querySelectorAll('dt, dd');
+        for (var s = 0; s < ContentFit.SPACING.length; s++) {
+          var sp = ContentFit.SPACING[s];
+          for (var j = 0; j < items.length; j++) {
+            items[j].style.marginBottom = sp[0];
+            items[j].style.lineHeight = sp[1];
+          }
+          for (var d = 0; d < dlItems.length; d++) {
+            dlItems[d].style.marginBottom = sp[0];
+          }
+          for (var k = 0; k < lists.length; k++) {
+            lists[k].style.marginTop = sp[2];
+            lists[k].style.marginBottom = sp[2];
+          }
+          for (var t = 0; t < tables.length; t++) {
+            tables[t].style.marginTop = sp[2];
+            tables[t].style.marginBottom = sp[2];
+          }
+          for (var b = 0; b < blockquotes.length; b++) {
+            blockquotes[b].style.marginTop = sp[2];
+            blockquotes[b].style.marginBottom = sp[2];
+          }
+          if (!ContentFit._over(slide)) return;
+        }
+      }
+
+      // Pass 1.5: Compress table cell padding and border-spacing
+      if (tables.length && ContentFit._over(slide)) {
+        var cells = slide.querySelectorAll('td, th');
+        var cellPaddings = ['0.4em', '0.3em', '0.2em', '0.1em', '0'];
+        for (var cp = 0; cp < cellPaddings.length; cp++) {
+          for (var c = 0; c < cells.length; c++) {
+            cells[c].style.padding = cellPaddings[cp];
+            cells[c].style.lineHeight = '1.2';
+          }
+          for (var ts = 0; ts < tables.length; ts++) {
+            tables[ts].style.borderCollapse = 'collapse';
+            tables[ts].style.borderSpacing = '0';
+          }
+          if (!ContentFit._over(slide)) return;
+        }
+      }
+
+      // Pass 2: Reduce font-size on structural elements
+      if (hasStructural) {
+        var baseFontSize = lists.length ? parseFloat(getComputedStyle(lists[0]).fontSize) :
+                           tables.length ? parseFloat(getComputedStyle(tables[0]).fontSize) :
+                           dls.length ? parseFloat(getComputedStyle(dls[0]).fontSize) :
+                           parseFloat(getComputedStyle(blockquotes[0]).fontSize);
+        var scale = 1.0;
+        while (scale - ContentFit.FONT_STEP >= ContentFit.MIN_SCALE) {
+          scale -= ContentFit.FONT_STEP;
+          var size = (baseFontSize * scale).toFixed(2) + 'px';
+          for (var l = 0; l < lists.length; l++) lists[l].style.fontSize = size;
+          for (var tb = 0; tb < tables.length; tb++) tables[tb].style.fontSize = size;
+          for (var dl = 0; dl < dls.length; dl++) dls[dl].style.fontSize = size;
+          for (var bq = 0; bq < blockquotes.length; bq++) blockquotes[bq].style.fontSize = size;
+          if (!ContentFit._over(slide)) return;
+        }
+      }
+
+      // Pass 3: Reduce overall slide font-size as last resort
+      var slideBase = parseFloat(getComputedStyle(slide).fontSize);
+      var slideScale = 1.0;
+      while (slideScale - ContentFit.FONT_STEP >= ContentFit.MIN_SCALE) {
+        slideScale -= ContentFit.FONT_STEP;
+        var slideSize = (slideBase * slideScale).toFixed(2) + 'px';
+        slide.style.fontSize = slideSize;
+        if (!ContentFit._over(slide)) return;
+      }
+    }
+  };
+
+  // ── SvgTheme ──
+  var SvgTheme = {
+    _cache: {},
+
+    _hexToHsl: function (hex) {
+      var r = parseInt(hex.slice(1, 3), 16) / 255;
+      var g = parseInt(hex.slice(3, 5), 16) / 255;
+      var b = parseInt(hex.slice(5, 7), 16) / 255;
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var l = (max + min) / 2, s = 0, h = 0;
+      if (max !== min) {
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+        else if (max === g) h = (b - r) / d + 2;
+        else h = (r - g) / d + 4;
+        h /= 6;
+      }
+      return [h * 360, s, l];
+    },
+
+    _hslToHex: function (h, s, l) {
+      h /= 360;
+      var r, g, b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        var hue2rgb = function (p, q, t) {
+          if (t < 0) t += 1; if (t > 1) t -= 1;
+          if (t < 1 / 6) return p + (q - p) * 6 * t;
+          if (t < 1 / 2) return q;
+          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+          return p;
+        };
+        r = hue2rgb(p, q, h + 1 / 3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1 / 3);
+      }
+      var toHex = function (c) { var v = Math.round(c * 255).toString(16); return v.length === 1 ? '0' + v : v; };
+      return '#' + toHex(r) + toHex(g) + toHex(b);
+    },
+
+    // Recolour the four hardcoded Observatory SVG values with theme-derived equivalents.
+    // The three bg stops are offset from bg luminance; direction flips for light-mode themes.
+    // Threshold is skewed dark: anything with L < 0.45 is treated as dark mode.
+    _recolour: function (svgText, accentHex, bgHex) {
+      var hsl = SvgTheme._hexToHsl(bgHex);
+      var h = hsl[0], s = hsl[1], l = hsl[2];
+      // Offsets derived from original dark-mode stops relative to #0f172a (L≈0.112):
+      //   centre #151f35 = bg +0.033 L  |  edge #070b15 = bg −0.057 L
+      // Light mode (L >= 0.45): invert so the radial spotlight reads correctly.
+      var isDark = l < 0.45;
+      var cOff = isDark ?  0.033 : -0.033;
+      var eOff = isDark ? -0.057 :  0.057;
+      var centre = SvgTheme._hslToHex(h, s, Math.max(0, Math.min(1, l + cOff)));
+      var edge   = SvgTheme._hslToHex(h, s, Math.max(0, Math.min(1, l + eOff)));
+      svgText = svgText.replace(/#151f35/gi, centre);
+      svgText = svgText.replace(/#0f172a/gi, bgHex);
+      svgText = svgText.replace(/#070b15/gi, edge);
+      svgText = svgText.replace(/#38bdf8/gi, accentHex);
+      return svgText;
+    },
+
+    applyTo: function (el, svgUrl, config) {
+      var t = config.theme || {};
+      var style = getComputedStyle(document.documentElement);
+      var bg     = (t.background || style.getPropertyValue('--dm-bg').trim()     || '#0f172a').trim();
+      var accent = (t.accent     || style.getPropertyValue('--dm-accent').trim() || '#38bdf8').trim();
+
+      // Require full 6-digit hex; fall back to raw URL if colours are non-hex
+      if (!/^#[0-9a-f]{6}$/i.test(bg) || !/^#[0-9a-f]{6}$/i.test(accent)) {
+        el.style.backgroundImage = 'url(' + svgUrl + ')';
+        return;
+      }
+
+      var cacheKey = svgUrl + '|' + bg + '|' + accent;
+      var pendingKey = cacheKey + '_p';
+
+      if (SvgTheme._cache[cacheKey]) {
+        el.style.backgroundImage = 'url("' + SvgTheme._cache[cacheKey] + '")';
+        return;
+      }
+
+      // 1. Inline <script type="image/svg+xml" data-fs-src="..."> — works from file://
+      var tags = document.querySelectorAll('script[type="image/svg+xml"]');
+      for (var i = 0; i < tags.length; i++) {
+        if (tags[i].getAttribute('data-fs-src') === svgUrl) {
+          var uri = 'data:image/svg+xml,' + encodeURIComponent(SvgTheme._recolour(tags[i].textContent, accent, bg));
+          SvgTheme._cache[cacheKey] = uri;
+          el.style.backgroundImage = 'url("' + uri + '")';
+          return;
+        }
+      }
+
+      // 2. XHR — works from HTTP; set raw CSS URL as visible fallback while loading
+      el.style.backgroundImage = 'url(' + svgUrl + ')';
+      if (SvgTheme._cache[pendingKey]) {
+        SvgTheme._cache[pendingKey].push(el);
+        return;
+      }
+      SvgTheme._cache[pendingKey] = [el];
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', svgUrl, true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status !== 200 && !(xhr.status === 0 && xhr.responseText)) return;
+        var uri = 'data:image/svg+xml,' + encodeURIComponent(SvgTheme._recolour(xhr.responseText, accent, bg));
+        SvgTheme._cache[cacheKey] = uri;
+        var pending = SvgTheme._cache[pendingKey] || [];
+        for (var i = 0; i < pending.length; i++) pending[i].style.backgroundImage = 'url("' + uri + '")';
+        delete SvgTheme._cache[pendingKey];
+      };
+      xhr.send();
+    }
+  };
+
   // ── Test ──
   var Test = {
     results: [],
@@ -796,6 +1039,7 @@
     Dom.build(slides, config);
     Nav.init(slides.length, config);
     AutoFit.run(config);
+    ContentFit.run();
     document.body.classList.add('fs-ready');
     if (slides.length && slides[0].heading) document.title = slides[0].heading;
     Test.run(slides, config);
